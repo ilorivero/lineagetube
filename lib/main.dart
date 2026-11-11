@@ -52,6 +52,8 @@ class _MusicHomePageState extends State<MusicHomePage>
 
   bool _isListening = false;
   bool _wakeWordEnabled = false;
+  bool _isInitializingSpeech = false;
+  bool _userPausedWakeWord = false;
   bool _awaitingWakeCommand = false;
   bool _commandListenActive = false;
   bool _isStartingRecognition = false;
@@ -101,6 +103,9 @@ class _MusicHomePageState extends State<MusicHomePage>
         ),
       )
       ..loadRequest(_musicUri);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_startWakeWordDetection());
+    });
   }
 
   @override
@@ -117,16 +122,29 @@ class _MusicHomePageState extends State<MusicHomePage>
       unawaited(_stopWakeWordDetection(
         status: 'Ativação Friday pausada enquanto o app está em segundo plano',
       ));
+    } else if (state == AppLifecycleState.resumed &&
+        !_wakeWordEnabled &&
+        !_userPausedWakeWord) {
+      unawaited(_startWakeWordDetection());
     }
   }
 
   Future<void> _toggleListening() async {
     if (_wakeWordEnabled) {
-      await _stopWakeWordDetection(status: 'Ativação Friday desativada');
+      _userPausedWakeWord = true;
+      await _stopWakeWordDetection(status: 'Ativação Friday pausada');
       return;
     }
 
-    setState(() => _status = 'Preparando ativação por voz');
+    _userPausedWakeWord = false;
+    await _startWakeWordDetection();
+  }
+
+  Future<void> _startWakeWordDetection() async {
+    if (!mounted || _wakeWordEnabled || _isInitializingSpeech) return;
+
+    _isInitializingSpeech = true;
+    setState(() => _status = 'Solicitando acesso ao microfone e preparando Friday');
     try {
       if (!_speechInitialized) {
         final available = await _speech.initialize(
@@ -136,10 +154,11 @@ class _MusicHomePageState extends State<MusicHomePage>
         _speechInitialized = available;
       }
 
+      if (!mounted) return;
       if (!_speechInitialized) {
         setState(() {
           _status =
-              'Reconhecimento indisponível. Verifique a permissão do microfone e o serviço de voz do Android.';
+              'Reconhecimento indisponível. Permita o microfone e o reconhecimento de voz nas configurações do sistema e tente novamente.';
         });
         return;
       }
@@ -150,7 +169,7 @@ class _MusicHomePageState extends State<MusicHomePage>
         _wakeWordEnabled = true;
         _awaitingWakeCommand = false;
         _commandListenActive = false;
-        _status = 'Diga “Friday” e depois um comando';
+        _status = 'Diga “Friday” (fraidei) ou “sexta-feira” e um comando';
       });
       await _startRecognition(localeId: localeId);
     } on PlatformException catch (error) {
@@ -167,6 +186,8 @@ class _MusicHomePageState extends State<MusicHomePage>
           _status = 'Erro ao iniciar voz: $error';
         });
       }
+    } finally {
+      _isInitializingSpeech = false;
     }
   }
 
@@ -210,8 +231,8 @@ class _MusicHomePageState extends State<MusicHomePage>
         setState(() {
           _isListening = true;
           _status = _awaitingWakeCommand
-              ? 'Friday detectada. Diga um comando agora'
-              : 'Ativação Friday ligada — diga “Friday”';
+              ? 'Palavra de ativação detectada. Diga um comando agora'
+              : 'Ativação ligada — diga “Friday” ou “sexta-feira”';
         });
       }
     } on PlatformException catch (error) {
@@ -266,8 +287,8 @@ class _MusicHomePageState extends State<MusicHomePage>
       setState(() {
         _isListening = true;
         _status = _awaitingWakeCommand
-            ? 'Friday detectada. Diga um comando agora'
-            : 'Ativação Friday ligada — diga “Friday”';
+            ? 'Palavra de ativação detectada. Diga um comando agora'
+            : 'Ativação ligada — diga “Friday” ou “sexta-feira”';
       });
     } else if (status == 'notListening' || status == 'done') {
       setState(() {
@@ -277,7 +298,7 @@ class _MusicHomePageState extends State<MusicHomePage>
             _commandListenActive) {
           _awaitingWakeCommand = false;
           _commandListenActive = false;
-          _status = 'Comando não detectado. Diga “Friday” novamente';
+          _status = 'Comando não detectado. Diga “Friday” ou “sexta-feira” novamente';
         }
       });
       _scheduleRecognitionRestart();
@@ -310,7 +331,7 @@ class _MusicHomePageState extends State<MusicHomePage>
         setState(() {
           _awaitingWakeCommand = false;
           _commandListenActive = false;
-          _status = 'Comando não reconhecido. Diga “Friday” para tentar de novo';
+          _status = 'Comando não reconhecido. Diga “Friday” ou “sexta-feira” para tentar de novo';
         });
         return;
       }
@@ -327,7 +348,7 @@ class _MusicHomePageState extends State<MusicHomePage>
       setState(() {
         _awaitingWakeCommand = true;
         _commandListenActive = false;
-        _status = 'Friday detectada. Diga um comando agora';
+        _status = 'Palavra de ativação detectada. Diga um comando agora';
       });
       unawaited(_speech.stop());
       _scheduleRecognitionRestart();
@@ -471,7 +492,7 @@ class _MusicHomePageState extends State<MusicHomePage>
                       _wakeWordEnabled ? Icons.mic_off : Icons.mic,
                     ),
                     label: Text(
-                      _wakeWordEnabled ? 'Desativar Friday' : 'Ativar Friday',
+                      _wakeWordEnabled ? 'Pausar Friday' : 'Ativar Friday',
                     ),
                     style: FilledButton.styleFrom(
                       backgroundColor: _wakeWordEnabled
@@ -482,7 +503,7 @@ class _MusicHomePageState extends State<MusicHomePage>
                 ],
               ),
               const Text(
-                'Diga “Friday, próxima” ou “Friday” e depois: tocar, pausar, próxima, anterior, volume',
+                'Diga “Friday” (fraidei) ou “sexta-feira”, seguido de: tocar, pausar, próxima, anterior, volume',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(color: Colors.white54, fontSize: 11),

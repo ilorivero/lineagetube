@@ -6,6 +6,9 @@ enum PlaybackCommand {
   volumeUp,
   volumeDown;
 
+  static final RegExp _wakeWordPattern =
+      RegExp(r'\b(?:friday|fraidei|sexta(?: feira)?)\b');
+
   String get confirmation => switch (this) {
         PlaybackCommand.play => 'Reprodução iniciada',
         PlaybackCommand.pause => 'Reprodução pausada',
@@ -170,13 +173,13 @@ enum PlaybackCommand {
 
   static PlaybackCommand? fromWakePhrase(String phrase) {
     final normalized = _normalize(phrase);
-    final wakeWord = RegExp(r'\bfriday\b').firstMatch(normalized);
+    final wakeWord = _wakeWordPattern.firstMatch(normalized);
     if (wakeWord == null) return null;
     return fromPhrase(normalized.substring(wakeWord.end));
   }
 
   static bool containsWakeWord(String phrase) =>
-      RegExp(r'\bfriday\b').hasMatch(_normalize(phrase));
+      _wakeWordPattern.hasMatch(_normalize(phrase));
 
   static bool _containsAny(String text, List<String> terms) =>
       terms.any(text.contains);

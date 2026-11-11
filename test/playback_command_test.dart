@@ -44,6 +44,18 @@ void main() {
       expect(PlaybackCommand.fromWakePhrase('Friday'), isNull);
     });
 
+    test('recognizes English and Portuguese wake word pronunciations', () {
+      for (final wakePhrase in ['fraidei', 'sexta-feira', 'sexta feira']) {
+        expect(
+          PlaybackCommand.fromWakePhrase('$wakePhrase, próxima música'),
+          PlaybackCommand.next,
+        );
+        expect(PlaybackCommand.containsWakeWord('Ei, $wakePhrase'), isTrue);
+      }
+
+      expect(PlaybackCommand.containsWakeWord('sextavocês'), isFalse);
+    });
+
     test('returns null for unrelated speech', () {
       expect(PlaybackCommand.fromPhrase('bom dia'), isNull);
       expect(PlaybackCommand.fromPhrase('   '), isNull);
