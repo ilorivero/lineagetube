@@ -1,11 +1,11 @@
 {
-    "name": "youtubealexa",
-    "short_name": "youtubealexa",
+    "name": "LineageTube",
+    "short_name": "LineageTube",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Controle o YouTube Music por voz e toque.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.ilorivero" "\0"
-            VALUE "FileDescription", "youtubealexa" "\0"
+            VALUE "FileDescription", "LineageTube" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "youtubealexa" "\0"
+            VALUE "InternalName", "lineagetube" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.ilorivero. All rights reserved." "\0"
-            VALUE "OriginalFilename", "youtubealexa.exe" "\0"
-            VALUE "ProductName", "youtubealexa" "\0"
+            VALUE "OriginalFilename", "lineagetube.exe" "\0"
+            VALUE "ProductName", "LineageTube" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

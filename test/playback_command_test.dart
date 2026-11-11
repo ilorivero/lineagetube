@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:youtubealexa/playback_command.dart';
+import 'package:lineagetube/playback_command.dart';
 
 void main() {
   group('PlaybackCommand.fromPhrase', () {

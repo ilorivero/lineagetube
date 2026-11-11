@@ -10,16 +10,16 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'playback_command.dart';
 
 void main() {
-  runApp(const YouTubeMusicVoiceApp());
+  runApp(const LineageTubeApp());
 }
 
-class YouTubeMusicVoiceApp extends StatelessWidget {
-  const YouTubeMusicVoiceApp({super.key});
+class LineageTubeApp extends StatelessWidget {
+  const LineageTubeApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'YouTube Music Voice',
+      title: 'LineageTube',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
